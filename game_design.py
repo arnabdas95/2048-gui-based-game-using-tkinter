@@ -3,54 +3,61 @@ from tkinter import  *
 from tkinter import messagebox
 import random
 import copy
+
+#tkinter display setup
 root =Tk()
 root.title('2048 G A M E')
 root.resizable(height = False, width = False)
-#root.geometry('540x663')
 
 
-
-
+#variables
+#cancel_timer variable reset timer for restart and new game
+global cancl_timer
+#second minute and hour for timer stopwatch
+sc = min = hr = 0
+#number of rows and columns in game
+rows, cols = (4, 4)
 
 
 # define 2048 grid 4*4
-global cancl_timer
-swap = 0
-sc = min = hr = 0
-rows, cols = (4, 4)
 grid = [[0 for i in range(rows)] for j in range(cols)]
+
+#create a duplicate undo_grid for undo move that stores previous grid data
 undo_grid = copy.deepcopy(grid)
 # end_game flag for infinite loop
 not_end = True
+
+#whene game restart and new game starts reset all the grids and assign new two number initially  and reset  timer
 def gird_create():
     for i in range(rows):
        for j in range(cols):
            grid[i][j] = 0
     not_end = True
-    global sc ,min,hr,cancl_timer
+    global sc ,min,hr,cancl_timer,undo_grid
     root.after_cancel(cancl_timer)
     hr=0
     sc=0
     min =0
     new_num_assign()
     new_num_assign()
+    undo_grid = copy.deepcopy(grid)
 
 
 
-
-
+#before each move the states will be saved in  undo_grid for undo move
 def undo_copy():
-    global grid,undo_grid
-    for i in range(rows):
-        for j in range(cols):
-            undo_grid[i][j]=grid[i][j]
+    global undo_grid,grid
+    undo_grid = copy.deepcopy(grid)
 
 
+#when undo a move the grid will go to previous state according to undo_grid
 def undo_game():
     for i in range(rows):
         for j in range(cols):
             grid[i][j]=undo_grid[i][j]
     tk_display()
+
+#after each move if the grid dos not change from previous grid then no new number will assign to the grid
 def grid_compare():
     global grid,undo_grid
     for i in range(rows):
@@ -58,6 +65,7 @@ def grid_compare():
             if undo_grid[i][j]!=grid[i][j]:
                 return 1
     return 0
+
 # check for end of game
 # if all the cells are full and no 2048
 def check_full_grid():
@@ -68,11 +76,11 @@ def check_full_grid():
                 zero_flag = True
             elif grid[i][j] == 2048:
                 show_msg(0)
-                #end_game()
+
     if  zero_flag == False:
         show_msg(1)
-        #end_game()
 
+#after end of game display win or Lost and ask for new game or exit
 def show_msg(x):
     if x ==0:
         tk_display()
@@ -100,7 +108,7 @@ def show_msg(x):
            exit()
 
 
-
+#function for different colours for different grid elements
 def colorpicker(i,j):
     if grid[i][j]==2  or grid[i][j]==512:
         return '#94d0cc'
@@ -121,10 +129,11 @@ def colorpicker(i,j):
     if grid[i][j] ==2048:
         return 'red'
 
+#function for displaying the grid in gui
 def tk_display():
     for i in range(4):
         for j in range(4):
-            Button(root, text=grid[i][j], font="calibri 13", bg=colorpicker(i,j),fg = 'black', height = 5, width = 15,state = 'disabled',relief = 'solid').grid(row=i, column=j)
+            Label(root, text=grid[i][j], font="Helvatica 14", bg=colorpicker(i,j),fg = 'black', height = 7, width = 15,relief = 'solid',).grid(row=i, column=j)
 
 
 
@@ -143,7 +152,7 @@ def get_random_grid():
 
 
 # devide the get_random_grid into row and coloum
-# find blank cell
+# find blank cell and assign new number 2 or 4
 def new_num_assign():
 
     row = get_random_grid()
@@ -154,10 +163,7 @@ def new_num_assign():
     else:
         new_num_assign()
 
-# new_num_assign()
-# new_num_assign()
-# tk_display()
-# left swipe
+#left swip
 def left_swap():
     for i in range(rows):
         temp = []
@@ -198,7 +204,7 @@ def down_swap():
         for assign_num in range(len(temp)):
             grid[rows - len(temp) + assign_num][j] = temp[assign_num]
 
-
+#up swip
 def up_swap():
     for j in range(rows):
         temp = []
@@ -210,7 +216,7 @@ def up_swap():
             grid[assign_num][j] = temp[assign_num]
 
 
-# left blending function
+# left blending function after swip merge same number
 def left_blend():
     global swap
     for i in range(rows):
@@ -222,7 +228,7 @@ def left_blend():
     left_swap()
 
 
-# right blending function
+# right blending function after swip merge same number
 def right_blend():
     global swap
     for i in range(rows):
@@ -234,7 +240,7 @@ def right_blend():
     right_swap()
 
 
-# up_blend
+# up_blend after swip merge same number
 def up_blend():
     global swap
     for i in range(cols):
@@ -245,7 +251,7 @@ def up_blend():
                 swap = 1
     up_swap()
 
-
+#down blend after swip merge same number
 def down_blend():
     global swap
     for i in range(cols):
@@ -257,7 +263,7 @@ def down_blend():
     down_swap()
 
 
-
+#function for countdown or stopwatch
 def clock():
     global sc , min ,hr
     sc= sc+1
@@ -273,11 +279,13 @@ def clock():
     curr_time.config(text ='%i:%i:%i'%(hr,min,sc))
     cancl_timer= curr_time.after(1000,clock)
 
-
+#for restart a game or new game
 def newgame():
      gird_create()
      tk_display()
      clock()
+
+#function to display how to play this game on a new window
 def helpme():
      help_notes ='''2048 is played on a plain 4×4 grid, with numbered tiles that slide when a player moves them using the four arrow keys.
      [3] Every turn, a new tile randomly appears in an empty spot on the board with a value of either 2 or 4.
@@ -295,6 +303,10 @@ def helpme():
      top.resizable(height=False, width=False)
      #top.geometry('540x663')
      lbl = Label(top,text=help_notes,padx=50,pady=50).pack()
+
+
+
+#up button function for move up
 def up():
     undo_copy()
     up_swap()
@@ -303,6 +315,8 @@ def up():
         new_num_assign()
     check_full_grid()
     tk_display()
+
+#down button function for move down
 def down():
     undo_copy()
     down_swap()
@@ -311,6 +325,8 @@ def down():
         new_num_assign()
     check_full_grid()
     tk_display()
+
+ #right button function for move right
 def right():
     undo_copy()
     right_swap()
@@ -319,6 +335,8 @@ def right():
         new_num_assign()
     check_full_grid()
     tk_display()
+
+ #left button function for move left
 def left():
     undo_copy()
     left_swap()
@@ -329,26 +347,33 @@ def left():
 
     tk_display()
 
-left_arrow =Button(root,text='LEFT',height = 13, width = 40,relief = 'groove',bg="#a3d2ca",command = left).grid(row=5,column=0,rowspan=2,columnspan=2)
-right_arrow =Button(root,text='RIGHT',height = 13, width = 40,relief = 'groove',bg="#a3d2ca",command = right).grid(row=5,column=2,rowspan=2,columnspan=2)
-up_arrow =Button(root,text='UP',height = 6, width = 25,relief = 'groove',bg="#d8ac9c",command = up).grid(row=5,column=1,columnspan=2)
-down_arrow=Button(root,text='DOWN',height = 6, width = 25,relief = 'groove',bg="#d8ac9c",command = down).grid(row=6,column=1,columnspan=2)
+#create button for move or play the fame joystick
+left_arrow =Button(root,text='LEFT',height = 5, width = 47,relief = 'groove',bg="#98ded9",command = left).grid(row=5,column=0,rowspan=2,columnspan=2)
+right_arrow =Button(root,text='RIGHT',height = 5, width = 47,relief = 'groove',bg="#98ded9",command = right).grid(row=5,column=2,rowspan=2,columnspan=2)
+up_arrow =Button(root,text='UP',height = 2, width = 25,relief = 'groove',bg="#c7ffd8",command = up).grid(row=5,column=1,columnspan=2)
+down_arrow=Button(root,text='DOWN',height = 2, width = 25,relief = 'groove',bg="#c7ffd8",command = down).grid(row=6,column=1,columnspan=2)
 
 
-
-new_game_button = Button(root,text='RESTART ',height = 5, width = 19,command = newgame,bg="#94d0cc",relief = 'solid').grid(row = 7,column = 1)
-undo = Button(root,text = 'UNDO',height = 5, width = 19,relief = 'solid',bg="#eec4c4",command = undo_game).grid(row = 7,column = 0)
-help_button = Button(root,text='HELP',height = 5, width = 19,relief = 'solid',bg="#f29191",command = helpme).grid(row = 7,column = 2)
-curr_time = Label(root,text=" ",height = 5, width = 19,relief = 'solid',bg="#feffde")
+#undo newgame help and timer button
+new_game_button = Button(root,text='RESTART ',height = 5, width = 23,command = newgame,bg="#94d0cc",relief = 'solid').grid(row = 7,column = 1)
+undo = Button(root,text = 'UNDO',height = 5, width = 23,relief = 'solid',bg="#eec4c4",command = undo_game).grid(row = 7,column = 0)
+help_button = Button(root,text='HELP',height = 5, width = 23,relief = 'solid',bg="#f29191",command = helpme).grid(row = 7,column = 2)
+curr_time = Button(root,text=" ",height = 5, width = 23,relief = 'solid',bg="#feffde")
 curr_time.grid(row = 7,column = 3)
 
 
 
 
-new_num_assign()
-new_num_assign()
-clock()
-tk_display()
+#main driver function program start from here
+def main():
+    new_num_assign()
+    new_num_assign()
+    undo_copy()
+    clock()
+    tk_display()
 
+if __name__=='__main__':
+
+    main()
 
 root.mainloop()
