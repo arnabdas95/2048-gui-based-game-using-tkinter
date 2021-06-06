@@ -1,4 +1,5 @@
 import functools
+import pickle
 from tkinter import  *
 from tkinter import messagebox
 import random
@@ -6,13 +7,15 @@ import copy
 
 #tkinter display setup
 root =Tk()
-root.title('2048 G A M E')
+root.title('2048 GAME')
 root.resizable(height = False, width = False)
 
 
 #variables
 #cancel_timer variable reset timer for restart and new game
 global cancl_timer
+global high_score
+my_score = 0
 #second minute and hour for timer stopwatch
 sc = min = hr = 0
 #number of rows and columns in game
@@ -27,20 +30,21 @@ undo_grid = copy.deepcopy(grid)
 # end_game flag for infinite loop
 not_end = True
 
-#whene game restart and new game starts reset all the grids and assign new two number initially  and reset  timer
+#whene game restart and new game starts reset all the grids and assign new two number initially  and reset  timer and score
 def gird_create():
     for i in range(rows):
        for j in range(cols):
            grid[i][j] = 0
-    not_end = True
-    global sc ,min,hr,cancl_timer,undo_grid
+    global sc ,min,hr,cancl_timer,undo_grid,my_score
     root.after_cancel(cancl_timer)
     hr=0
     sc=0
     min =0
+    my_score=0
     new_num_assign()
     new_num_assign()
     undo_grid = copy.deepcopy(grid)
+    score_card.config(text=my_score)
 
 
 
@@ -90,7 +94,6 @@ def show_msg(x):
         if res == 'yes':
 
             gird_create()
-            not_end = True
             clock()
 
         else:
@@ -101,7 +104,6 @@ def show_msg(x):
         responce = messagebox.askquestion('prompt', 'LOST\nTry New Game')
         if responce == 'yes':
            gird_create()
-           not_end = True
            clock()
 
         else:
@@ -129,18 +131,64 @@ def colorpicker(i,j):
     if grid[i][j] ==2048:
         return 'red'
 
+
+
+# For storing
+def store_high_score():
+    global my_score,high_score
+
+    if  high_score <my_score:
+        with open("highest_score.txt", "w") as f:
+            f.write(str(my_score))
+
+
+#retrive high score
+def get_high_score():
+    with open("highest_score.txt", "r") as f:
+        return f.read()
+# display high score
+def display_high_score():
+    global high_score
+    try:
+         hs = int(get_high_score())
+         high_score_card.config(text ="Highest Score : %i"%hs )
+
+         high_score= hs
+
+    except:
+        high_score = 0
+        high_score_card.config(text = "Highest Score : %i"%high_score )
+
+    store_high_score()
+
+
+
+
+
+#function for score
+def cal_my_score(x):
+    global my_score
+    my_score = my_score+x
+    score_card.config(text = "Your Score : %i"%my_score )
+
+
 #function for displaying the grid in gui
 def tk_display():
     for i in range(4):
         for j in range(4):
-            Label(root, text=grid[i][j], font="Helvatica 14", bg=colorpicker(i,j),fg = 'black', height = 7, width = 15,relief = 'solid',).grid(row=i, column=j)
+            Label(root, text=grid[i][j], font="Helvatica 14", bg=colorpicker(i,j),fg = 'black', height = 6, width = 15,relief = 'solid',).grid(row=i, column=j)
+    display_high_score()
+    store_high_score()
+    display_high_score()
 
 
 
 
 
 
-# define random function that produce 2 or 4 in blank cell
+
+
+#define random function that produce 2 or 4 in blank cell
 get_num_list = [2, 4]
 def get_num():
     return random.choice(get_num_list)
@@ -218,48 +266,49 @@ def up_swap():
 
 # left blending function after swip merge same number
 def left_blend():
-    global swap
+    #global swap
     for i in range(rows):
         for j in range(cols-1):
             if grid[i][j] == grid[i][j + 1] and grid[i][j] != 0:
                 grid[i][j] = 2 * grid[i][j]
                 grid[i][j + 1] = 0
-                swap = 1
+                cal_my_score(grid[i][j])
     left_swap()
 
 
 # right blending function after swip merge same number
 def right_blend():
-    global swap
+    #global swap
     for i in range(rows):
         for j in range(cols - 1, 0, -1):
             if grid[i][j] == grid[i][j - 1] and grid[i][j] != 0:
                 grid[i][j] = 2 * grid[i][j]
                 grid[i][j - 1] = 0
-                swap = 1
+                #swap = 1
+                cal_my_score(grid[i][j])
     right_swap()
 
 
 # up_blend after swip merge same number
 def up_blend():
-    global swap
+
     for i in range(cols):
         for j in range(rows-1):
             if grid[j][i] == grid[j + 1][i] and grid[j][i] != 0:
                 grid[j][i] = 2 * grid[j][i]
                 grid[j + 1][i] = 0
-                swap = 1
+                cal_my_score(grid[j][i])
     up_swap()
 
 #down blend after swip merge same number
 def down_blend():
-    global swap
+
     for i in range(cols):
         for j in range(rows - 1, 0, -1):
             if grid[j][i] == grid[j - 1][i] and grid[j][i] != 0:
                 grid[j][i] = 2 * grid[j][i]
                 grid[j - 1][i] = 0
-                swap = 1
+                cal_my_score(grid[j][i])
     down_swap()
 
 
@@ -287,21 +336,22 @@ def newgame():
 
 #function to display how to play this game on a new window
 def helpme():
-     help_notes ='''2048 is played on a plain 4×4 grid, with numbered tiles that slide when a player moves them using the four arrow keys.
-     [3] Every turn, a new tile randomly appears in an empty spot on the board with a value of either 2 or 4.
-     [4] Tiles slide as far as possible in the chosen direction until they are stopped by either another tile or the edge of the grid.
-      If two tiles of the same number collide while moving, they will merge into a tile with the total value of the two tiles that collided.
-      [5][6] The resulting tile cannot merge with another tile again in the same move. Higher-scoring tiles emit a soft glow,[4] and the highest possible tile is 131,072.[7]
-    If a move causes three consecutive tiles of the same value to slide together, only the two tiles farthest along the direction of motion will combine.
-    If all four spaces in a row or column are filled with tiles of the same value, a move parallel to that row/column will combine the first two and last two.[8]
-     A scoreboard on the upper-right keeps track of the user's score.
-     The user's score starts at zero, and is increased whenever two tiles combine, by the value of the new tile.[4]
-    The game is won when a tile with a value of 2048 appears on the board. Players can continue beyond that to reach higher scores.
-[9][10][11] When the player has no legal moves (there are no empty spaces and no adjacent tiles with the same value), the game ends.[2][12]
+     help_notes ='''2048 is played on a plain 4×4 grid, with numbered tiles that slide when a player moves them using the four arrow keys.\n
+     Every turn, a new tile randomly appears in an empty spot on the board with a value of either 2 or 4.\n
+     Tiles slide as far as possible in the chosen direction until they are stopped by either another tile or the edge of the grid.\n
+      If two tiles of the same number collide while moving, they will merge into a tile with the total value of the two tiles that collided.\n
+     The resulting tile cannot merge with another tile again in the same move. \n
+    If a move causes three consecutive tiles of the same value to slide together, only the two tiles farthest along the direction of motion will combine.\n
+    If all four spaces in a row or column are filled with tiles of the same value, a move parallel to that row/column will combine the first two and last two.\n
+     A scoreboard on the upper-right keeps track of the user's score.\n
+     The user's score starts at zero, and is increased whenever two tiles combine, by the value of the new tile.\n
+    The game is won when a tile with a value of 2048 appears on the board.\n
+     When the player has no legal moves (there are no empty spaces and no adjacent tiles with the same value), the game ends.\n
+     \n\n\n\n\nCreated by Arnab Das . 
      '''
      top =Toplevel()
      top.resizable(height=False, width=False)
-     #top.geometry('540x663')
+     top.geometry('900x500')
      lbl = Label(top,text=help_notes,padx=50,pady=50).pack()
 
 
@@ -355,12 +405,15 @@ down_arrow=Button(root,text='DOWN',height = 2, width = 25,relief = 'groove',bg="
 
 
 #undo newgame help and timer button
-new_game_button = Button(root,text='RESTART ',height = 5, width = 23,command = newgame,bg="#94d0cc",relief = 'solid').grid(row = 7,column = 1)
-undo = Button(root,text = 'UNDO',height = 5, width = 23,relief = 'solid',bg="#eec4c4",command = undo_game).grid(row = 7,column = 0)
-help_button = Button(root,text='HELP',height = 5, width = 23,relief = 'solid',bg="#f29191",command = helpme).grid(row = 7,column = 2)
-curr_time = Button(root,text=" ",height = 5, width = 23,relief = 'solid',bg="#feffde")
-curr_time.grid(row = 7,column = 3)
-
+new_game_button = Button(root,text='RESTART ',height = 3, width =23,command = newgame,bg="#94d0cc",relief = 'solid').grid(row = 8,column = 1)
+undo = Button(root,text = 'UNDO',height = 3, width =23,relief = 'solid',bg="#eec4c4",command = undo_game).grid(row = 8,column = 0)
+help_button = Button(root,text='HELP',height = 3, width =23,relief = 'solid',bg="#f29191",command = helpme).grid(row = 8,column = 2)
+curr_time = Button(root,text=" ",height = 3, width =23,relief = 'solid',bg="#feffde")
+curr_time.grid(row = 8,column = 3)
+high_score_card = Label(root,text="",height = 2, width =48,bg="#0a81ab",fg ="red",relief = 'solid')
+high_score_card.grid(row = 7,column=0,columnspan=2)
+score_card = Label(root,text="Your Score : 0",height = 2, width =48,bg="#511281",fg="white",relief = 'solid')
+score_card.grid(row = 7,column=2,columnspan=2)
 
 
 
