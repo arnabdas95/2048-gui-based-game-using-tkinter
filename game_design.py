@@ -36,7 +36,7 @@ def gird_create():
     for i in range(rows):
        for j in range(cols):
            grid[i][j] = 0
-    global sc ,min,hr,cancl_timer,undo_grid,my_score
+    global sc ,min,hr,cancl_timer,undo_grid,my_score,undo_high_score
     root.after_cancel(cancl_timer)
     hr=0
     sc=0
@@ -47,7 +47,7 @@ def gird_create():
     undo_grid = copy.deepcopy(grid)
     undo_my_score = 0
     score_card.config(text=my_score)
-
+    undo_high_score = high_score
 
 
 #before each move the states will be saved in  undo_grid for undo move
@@ -66,10 +66,8 @@ def undo_game():
     high_score_card.config(text="xxHighest Score : %i" % int(undo_high_score))
     with open("highest_score.txt", "w") as f:
         f.write(str(undo_high_score))
-    score_card.config(text="xxYour Score : %i" % undo_my_score)
+    score_card.config(text="Your Score : %i" % undo_my_score)
     my_score=undo_my_score
-    with open("highest_score.txt", "w") as f:
-        f.write(str(undo_high_score))
     tk_display()
 
 #after each move if the grid dos not change from previous grid then no new number will assign to the grid
@@ -175,12 +173,8 @@ def undo_high_func():
     global undo_high_score
     try:
          undo_high_score = int(get_high_score())
-         # high_score_card.config(text ="Highest Score : %i"%undo_high_score )
-
-
     except:
         undo_high_score = 0
-        # high_score_card.config(text = "Highest Score : %i"%undo_high_score )
 
 
 
