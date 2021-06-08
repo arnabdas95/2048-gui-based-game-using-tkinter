@@ -14,7 +14,7 @@ root.resizable(height = False, width = False)
 #variables
 #cancel_timer variable reset timer for restart and new game
 global cancl_timer
-global high_score
+global high_score,my_score,undo_my_score,undo_high_score
 my_score = 0
 #second minute and hour for timer stopwatch
 sc = min = hr = 0
@@ -32,6 +32,7 @@ not_end = True
 
 #whene game restart and new game starts reset all the grids and assign new two number initially  and reset  timer and score
 def gird_create():
+    global my_score,undo_my_score
     for i in range(rows):
        for j in range(cols):
            grid[i][j] = 0
@@ -44,21 +45,31 @@ def gird_create():
     new_num_assign()
     new_num_assign()
     undo_grid = copy.deepcopy(grid)
+    undo_my_score = 0
     score_card.config(text=my_score)
 
 
 
 #before each move the states will be saved in  undo_grid for undo move
 def undo_copy():
-    global undo_grid,grid
+    global undo_grid,grid,my_score,undo_my_score,undo_high_score
     undo_grid = copy.deepcopy(grid)
-
+    undo_my_score = my_score
+    undo_high_func()
 
 #when undo a move the grid will go to previous state according to undo_grid
 def undo_game():
+    global undo_high_score,my_score
     for i in range(rows):
         for j in range(cols):
             grid[i][j]=undo_grid[i][j]
+    high_score_card.config(text="xxHighest Score : %i" % int(undo_high_score))
+    with open("highest_score.txt", "w") as f:
+        f.write(str(undo_high_score))
+    score_card.config(text="xxYour Score : %i" % undo_my_score)
+    my_score=undo_my_score
+    with open("highest_score.txt", "w") as f:
+        f.write(str(undo_high_score))
     tk_display()
 
 #after each move if the grid dos not change from previous grid then no new number will assign to the grid
@@ -160,6 +171,17 @@ def display_high_score():
         high_score_card.config(text = "Highest Score : %i"%high_score )
 
     store_high_score()
+def undo_high_func():
+    global undo_high_score
+    try:
+         undo_high_score = int(get_high_score())
+         # high_score_card.config(text ="Highest Score : %i"%undo_high_score )
+
+
+    except:
+        undo_high_score = 0
+        # high_score_card.config(text = "Highest Score : %i"%undo_high_score )
+
 
 
 
@@ -174,10 +196,12 @@ def cal_my_score(x):
 
 #function for displaying the grid in gui
 def tk_display():
+    global undo_high_score
     for i in range(4):
         for j in range(4):
             Label(root, text=grid[i][j], font="Helvatica 14", bg=colorpicker(i,j),fg = 'black', height = 6, width = 15,relief = 'solid',).grid(row=i, column=j)
     display_high_score()
+    #undo_high_score = get_high_score()
     store_high_score()
     display_high_score()
 
