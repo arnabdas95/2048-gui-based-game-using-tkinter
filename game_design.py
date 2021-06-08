@@ -1,5 +1,5 @@
-import functools
-import pickle
+
+from pynput import keyboard
 from tkinter import  *
 from tkinter import messagebox
 import random
@@ -356,6 +356,8 @@ def helpme():
 
 
 
+
+
 #up button function for move up
 def up():
     undo_copy()
@@ -397,11 +399,58 @@ def left():
 
     tk_display()
 
+
+
+
+
+
+#up button function for move up
+def k_up(event):
+    undo_copy()
+    up_swap()
+    up_blend()
+    if grid_compare():
+        new_num_assign()
+    check_full_grid()
+    tk_display()
+
+#down button function for move down
+def k_down(event):
+    undo_copy()
+    down_swap()
+    down_blend()
+    if grid_compare():
+        new_num_assign()
+    check_full_grid()
+    tk_display()
+
+ #right button function for move right
+def k_right(event):
+    undo_copy()
+    right_swap()
+    right_blend()
+    if grid_compare():
+        new_num_assign()
+    check_full_grid()
+    tk_display()
+
+ #left button function for move left
+def k_left(event):
+    undo_copy()
+    left_swap()
+    left_blend()
+    if grid_compare():
+        new_num_assign()
+    check_full_grid()
+
+    tk_display()
+
 #create button for move or play the fame joystick
 left_arrow =Button(root,text='LEFT',height = 5, width = 47,relief = 'groove',bg="#98ded9",command = left).grid(row=5,column=0,rowspan=2,columnspan=2)
 right_arrow =Button(root,text='RIGHT',height = 5, width = 47,relief = 'groove',bg="#98ded9",command = right).grid(row=5,column=2,rowspan=2,columnspan=2)
 up_arrow =Button(root,text='UP',height = 2, width = 25,relief = 'groove',bg="#c7ffd8",command = up).grid(row=5,column=1,columnspan=2)
 down_arrow=Button(root,text='DOWN',height = 2, width = 25,relief = 'groove',bg="#c7ffd8",command = down).grid(row=6,column=1,columnspan=2)
+
 
 
 #undo newgame help and timer button
@@ -416,6 +465,10 @@ score_card = Label(root,text="Your Score : 0",height = 2, width =48,bg="#511281"
 score_card.grid(row = 7,column=2,columnspan=2)
 
 
+root.bind("8",k_up)
+root.bind("2",k_down)
+root.bind("4",k_left)
+root.bind("6",k_right)
 
 #main driver function program start from here
 def main():
@@ -424,6 +477,9 @@ def main():
     undo_copy()
     clock()
     tk_display()
+
+
+
 
 if __name__=='__main__':
 
