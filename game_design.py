@@ -1,5 +1,5 @@
 
-from pynput import keyboard
+import pygame
 from tkinter import  *
 from tkinter import messagebox
 import random
@@ -29,6 +29,31 @@ grid = [[0 for i in range(rows)] for j in range(cols)]
 undo_grid = copy.deepcopy(grid)
 # end_game flag for infinite loop
 not_end = True
+
+
+
+
+#sounds for button
+pygame.mixer.init()
+def play_swip():
+    pygame.mixer.music.load("game_sound/swip.mp3")
+    pygame.mixer.music.play(loops=0)
+
+def play_btn():
+    pygame.mixer.music.load("game_sound/btn.mp3")
+    pygame.mixer.music.play(loops=0)
+
+def play_undo():
+    pygame.mixer.music.load("game_sound/undo.mp3")
+    pygame.mixer.music.play(loops=0)
+def play_win():
+    pygame.mixer.music.load("game_sound/win.mp3")
+    pygame.mixer.music.play(loops=0)
+
+def play_lost():
+    pygame.mixer.music.load("game_sound/lost.mp3")
+    pygame.mixer.music.play(loops=0)
+
 
 #whene game restart and new game starts reset all the grids and assign new two number initially  and reset  timer and score
 def gird_create():
@@ -60,6 +85,7 @@ def undo_copy():
 #when undo a move the grid will go to previous state according to undo_grid
 def undo_game():
     global undo_high_score,my_score
+    play_undo()
     for i in range(rows):
         for j in range(cols):
             grid[i][j]=undo_grid[i][j]
@@ -97,11 +123,10 @@ def check_full_grid():
 def show_msg(x):
     if x ==0:
         tk_display()
-
+        play_win()
         gird_create()
         res = messagebox.askquestion('prompt', 'CONGO .YOU WIN...\nTry New Game')
         if res == 'yes':
-
             gird_create()
             clock()
 
@@ -110,6 +135,7 @@ def show_msg(x):
 
     else:
         tk_display()
+        play_lost()
         responce = messagebox.askquestion('prompt', 'LOST\nTry New Game')
         if responce == 'yes':
            gird_create()
@@ -121,13 +147,13 @@ def show_msg(x):
 
 #function for different colours for different grid elements
 def colorpicker(i,j):
-    if grid[i][j]==2  or grid[i][j]==512:
+    if grid[i][j]==2:
         return '#94d0cc'
     if grid[i][j]==4 or grid[i][j]==1024:
         return '#eec4c4'
     if grid[i][j]==8:
         return '#f29191'
-    if grid[i][j]==16 or grid[i][j]==256:
+    if grid[i][j]==16:
         return '#d1d9d9'
     if grid[i][j]==32:
         return '#fb9300'
@@ -137,8 +163,14 @@ def colorpicker(i,j):
         return '#feffde'
     if grid[i][j] == 128:
         return '#511281'
+    if grid[i][j]==256:
+        return '#de6ac3'
+    if grid[i][j] == 512:
+        return '#3858c9'
+    if grid[i][j] == 1024:
+        return '#a7bd02'
     if grid[i][j] ==2048:
-        return 'red'
+        return '#ff001e'
 
 
 
@@ -193,9 +225,8 @@ def tk_display():
     global undo_high_score
     for i in range(4):
         for j in range(4):
-            Label(root, text=grid[i][j], font="Helvatica 14", bg=colorpicker(i,j),fg = 'black', height = 6, width = 15,relief = 'solid',).grid(row=i, column=j)
+            Label(root, text=grid[i][j], font="Helvatica 15", bg=colorpicker(i,j),fg = 'black', height = 3, width = 7,relief = 'solid',).grid(row=i, column=j)
     display_high_score()
-    #undo_high_score = get_high_score()
     store_high_score()
     display_high_score()
 
@@ -348,12 +379,14 @@ def clock():
 
 #for restart a game or new game
 def newgame():
+     play_btn()
      gird_create()
      tk_display()
      clock()
 
 #function to display how to play this game on a new window
 def helpme():
+     play_btn()
      help_notes ='''2048 is played on a plain 4×4 grid, with numbered tiles that slide when a player moves them using the four arrow keys.\n
      Every turn, a new tile randomly appears in an empty spot on the board with a value of either 2 or 4.\n
      Tiles slide as far as possible in the chosen direction until they are stopped by either another tile or the edge of the grid.\n
@@ -378,6 +411,7 @@ def helpme():
 
 #up button function for move up
 def up():
+    play_swip()
     undo_copy()
     up_swap()
     up_blend()
@@ -388,6 +422,7 @@ def up():
 
 #down button function for move down
 def down():
+    play_swip()
     undo_copy()
     down_swap()
     down_blend()
@@ -398,6 +433,7 @@ def down():
 
  #right button function for move right
 def right():
+    play_swip()
     undo_copy()
     right_swap()
     right_blend()
@@ -408,6 +444,7 @@ def right():
 
  #left button function for move left
 def left():
+    play_swip()
     undo_copy()
     left_swap()
     left_blend()
@@ -424,6 +461,7 @@ def left():
 
 #up button function for move up
 def k_up(event):
+    play_swip()
     undo_copy()
     up_swap()
     up_blend()
@@ -434,6 +472,7 @@ def k_up(event):
 
 #down button function for move down
 def k_down(event):
+    play_swip()
     undo_copy()
     down_swap()
     down_blend()
@@ -444,6 +483,7 @@ def k_down(event):
 
  #right button function for move right
 def k_right(event):
+    play_swip()
     undo_copy()
     right_swap()
     right_blend()
@@ -454,6 +494,7 @@ def k_right(event):
 
  #left button function for move left
 def k_left(event):
+    play_swip()
     undo_copy()
     left_swap()
     left_blend()
@@ -464,22 +505,22 @@ def k_left(event):
     tk_display()
 
 #create button for move or play the fame joystick
-left_arrow =Button(root,text='LEFT',height = 5, width = 47,relief = 'groove',bg="#98ded9",command = left).grid(row=5,column=0,rowspan=2,columnspan=2)
-right_arrow =Button(root,text='RIGHT',height = 5, width = 47,relief = 'groove',bg="#98ded9",command = right).grid(row=5,column=2,rowspan=2,columnspan=2)
-up_arrow =Button(root,text='UP',height = 2, width = 25,relief = 'groove',bg="#c7ffd8",command = up).grid(row=5,column=1,columnspan=2)
-down_arrow=Button(root,text='DOWN',height = 2, width = 25,relief = 'groove',bg="#c7ffd8",command = down).grid(row=6,column=1,columnspan=2)
+left_arrow =Button(root,text='LEFT',height = 3, width = 22,relief = 'groove',bg="#98ded9",command = left).grid(row=5,column=0,rowspan=2,columnspan=2)
+right_arrow =Button(root,text='RIGHT',height = 3, width = 22,relief = 'groove',bg="#98ded9",command = right).grid(row=5,column=2,rowspan=2,columnspan=2)
+up_arrow =Button(root,text='UP',height = 1, width = 15,relief = 'groove',bg="#c7ffd8",command = up).grid(row=5,column=1,columnspan=2)
+down_arrow=Button(root,text='DOWN',height = 1, width = 15,relief = 'groove',bg="#c7ffd8",command = down).grid(row=6,column=1,columnspan=2)
 
 
 
 #undo newgame help and timer button
-new_game_button = Button(root,text='RESTART ',height = 3, width =23,command = newgame,bg="#94d0cc",relief = 'solid').grid(row = 8,column = 1)
-undo = Button(root,text = 'UNDO',height = 3, width =23,relief = 'solid',bg="#eec4c4",command = undo_game).grid(row = 8,column = 0)
-help_button = Button(root,text='HELP',height = 3, width =23,relief = 'solid',bg="#f29191",command = helpme).grid(row = 8,column = 2)
-curr_time = Button(root,text=" ",height = 3, width =23,relief = 'solid',bg="#feffde")
+new_game_button = Button(root,text='RESTART ',height = 3, width =10,padx =3,command = newgame,bg="#94d0cc",relief = 'flat').grid(row = 8,column = 1)
+undo = Button(root,text = 'UNDO',height = 3, width =10,padx=3,relief = 'flat',bg="#eec4c4",command = undo_game).grid(row = 8,column = 0)
+help_button = Button(root,text='HELP',height = 3, width =10,padx=3,relief = 'flat',bg="#f29191",command = helpme).grid(row = 8,column = 2)
+curr_time = Button(root,text=" ",height = 3, width =10,padx=3,relief = 'flat',bg="#feffde")
 curr_time.grid(row = 8,column = 3)
-high_score_card = Label(root,text="",height = 2, width =48,bg="#0a81ab",fg ="red",relief = 'solid')
+high_score_card = Label(root,text="",height = 2, width =23,bg="#0a81ab",fg ="red",relief = 'flat')
 high_score_card.grid(row = 7,column=0,columnspan=2)
-score_card = Label(root,text="Your Score : 0",height = 2, width =48,bg="#511281",fg="white",relief = 'solid')
+score_card = Label(root,text="Your Score : 0",height = 2, width =23,bg="#511281",fg="white",relief = 'flat')
 score_card.grid(row = 7,column=2,columnspan=2)
 
 
@@ -487,6 +528,22 @@ root.bind("8",k_up)
 root.bind("2",k_down)
 root.bind("4",k_left)
 root.bind("6",k_right)
+
+root.bind("<Up>", k_up)
+root.bind("<Down>",k_down)
+root.bind("<Left>",k_left)
+root.bind("<Right>",k_right)
+
+
+
+def closing_game():
+    #curr_time.after_cancel(clock)
+    root.quit()
+
+#when the close button is clicked it calls quit sys function otherwise tcl clock error occures
+root.protocol("WM_DELETE_WINDOW",closing_game)
+
+
 
 #main driver function program start from here
 def main():
